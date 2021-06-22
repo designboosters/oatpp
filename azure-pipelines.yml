@@ -4,8 +4,8 @@
 # https://aka.ms/yaml
 
 jobs:
-- job: ubuntu_20_04_mem_pool_on
-  displayName: 'Build - Ubuntu 18.04 - With Memory Pool'
+- job: ubuntu
+  displayName: 'Build - Ubuntu 20.04 - With Memory Pool'
   continueOnError: false
   pool:
     vmImage: 'Ubuntu 20.04'
@@ -14,10 +14,11 @@ jobs:
   steps:
     - script: |
         mkdir build
+      displayName: "Create build folder"
     - script: |
         cmake -DCMAKE_BUILD_TYPE=Release ..
         make
-      displayName: 'CMake'
+      displayName: 'Build'
       workingDirectory: build
     - task: CopyFiles@2
       displayName: "Copy headers"
@@ -28,9 +29,37 @@ jobs:
     - task: CopyFiles@2
       displayName: "Copy Library"
       inputs:
-        SourceFolder: "./"
-        Contents: "**/*.a"
+        SourceFolder: "build/src/"
+        Contents: "liboatpp.a"
         TargetFolder: $(Build.ArtifactStagingDirectory)/lib/linux/
+- job: windows
+  displayName: 'Build - Windows - With Memory Pool'
+  continueOnError: false
+  pool:
+    vmImage: 'windows-latest'
+  workspace:
+    clean: all
+  steps:
+    - script: |
+        MD build
+      displayName: 'Create build folder'
+    - script: |
+        cmake ..
+        cmake --build .
+      displayName: 'Build'
+      workingDirectory: build
+    - task: CopyFiles@2
+      displayName: "Copy Library"
+      inputs:
+        SourceFolder: "build/src/"
+        Contents: "oatpp.lib"
+        TargetFolder: $(Build.ArtifactStagingDirectory)/lib/windows/
+- job: publish
+  displayName: 'Publish Artifacts'
+  dependsOn: 
+    - ubuntu
+    - windows
+  steps:
     - task: PublishBuildArtifacts@1
       displayName: "Publish Artifacts"
       inputs:
