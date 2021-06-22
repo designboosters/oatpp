@@ -18,3 +18,8 @@ jobs:
         SourceFolder: "src/oatpp/"
         Contents: "**/?(*.h|*.hpp)"
         TargetFolder: $(Build.ArtifactStagingDirectory)/includes/
+    - task: PublishBuildArtifacts@1
+      displayName: "Publish Artifacts"
+      inputs:
+        pathToPublish: $(Build.ArtifactStagingDirectory)
+        artifactName: Artifacts
