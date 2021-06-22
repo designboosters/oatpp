@@ -19,10 +19,6 @@ jobs:
         make
       displayName: 'CMake'
       workingDirectory: build
-    - script: |
-        make test ARGS="-V"
-      displayName: 'Test'
-      workingDirectory: build
     - task: CopyFiles@2
       displayName: "Copy headers"
       inputs:
@@ -32,8 +28,8 @@ jobs:
     - task: CopyFiles@2
       displayName: "Copy Library"
       inputs:
-        SourceFolder: "build/oatpp/"
-        Contents: "*.a"
+        SourceFolder: "./"
+        Contents: "**/*.a"
         TargetFolder: $(Build.ArtifactStagingDirectory)/lib/linux/
     - task: PublishBuildArtifacts@1
       displayName: "Publish Artifacts"
