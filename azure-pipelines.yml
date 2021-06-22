@@ -12,12 +12,29 @@ jobs:
   workspace:
     clean: all
   steps:
+    - script: |
+        mkdir build
+    - script: |
+        cmake -DCMAKE_BUILD_TYPE=Release ..
+        make
+      displayName: 'CMake'
+      workingDirectory: build
+    - script: |
+        make test ARGS="-V"
+      displayName: 'Test'
+      workingDirectory: build
     - task: CopyFiles@2
       displayName: "Copy headers"
       inputs:
         SourceFolder: "src/oatpp/"
         Contents: "**/?(*.h|*.hpp)"
         TargetFolder: $(Build.ArtifactStagingDirectory)/includes/
+    - task: CopyFiles@2
+      displayName: "Copy Library"
+      inputs:
+        SourceFolder: "build/oatpp/"
+        Contents: "*.a"
+        TargetFolder: $(Build.ArtifactStagingDirectory)/lib/linux/
     - task: PublishBuildArtifacts@1
       displayName: "Publish Artifacts"
       inputs:
