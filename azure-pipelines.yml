@@ -4,13 +4,11 @@
 # https://aka.ms/yaml
 
 jobs:
-- job: publish
+- job: copyHeaders
   displayName: 'Publish headers'
   continueOnError: false
   pool:
     vmImage: 'ubuntu-latest'
-  workspace:
-    clean: all
   steps:
     - task: CopyFiles@2
       displayName: "Copy Headers"
@@ -18,12 +16,7 @@ jobs:
         SourceFolder: "src/oatpp/"
         Contents: "**/?(*.h|*.hpp)"
         TargetFolder: $(Build.ArtifactStagingDirectory)/includes/
-    - task: PublishBuildArtifacts@1
-      displayName: "Publish Artifacts"
-      inputs:
-        pathToPublish: $(Build.ArtifactStagingDirectory)
-        artifactName: Artifacts
-- job: ubuntu
+- job: linuxBuild
   displayName: 'Build - Ubuntu 20.04 - With Memory Pool'
   continueOnError: false
   pool:
@@ -45,18 +38,11 @@ jobs:
         SourceFolder: "build/src/"
         Contents: "liboatpp.a"
         TargetFolder: $(Build.ArtifactStagingDirectory)/lib/linux/
-    - task: PublishBuildArtifacts@1
-      displayName: "Publish Artifacts"
-      inputs:
-        pathToPublish: $(Build.ArtifactStagingDirectory)
-        artifactName: Artifacts
-- job: windows
+- job: windowsBuild
   displayName: 'Build - Windows - With Memory Pool'
   continueOnError: false
   pool:
     vmImage: 'windows-latest'
-  workspace:
-    clean: all
   steps:
     - script: |
         MD build
@@ -69,9 +55,20 @@ jobs:
     - task: CopyFiles@2
       displayName: "Copy Library"
       inputs:
-        SourceFolder: "build/src/"
-        Contents: "oatpp.lib"
+        SourceFolder: "./"
+        Contents: "**/*..lib"
         TargetFolder: $(Build.ArtifactStagingDirectory)/lib/windows/
+- job: publish
+  displayName: 'Publish headers'
+  continueOnError: false
+  dependsOn:
+    - copyHeaders
+    - linuxBuild
+    - windowsBuild
+  pool:
+    vmImage: 'ubuntu-latest'
+  steps:
+    - checkout: none
     - task: PublishBuildArtifacts@1
       displayName: "Publish Artifacts"
       inputs:
