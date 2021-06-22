@@ -16,6 +16,11 @@ jobs:
         SourceFolder: "src/oatpp/"
         Contents: "**/?(*.h|*.hpp)"
         TargetFolder: $(Build.ArtifactStagingDirectory)/includes/
+    - task: PublishBuildArtifacts@1
+      displayName: "Publish Artifacts"
+      inputs:
+        pathToPublish: $(Build.ArtifactStagingDirectory)
+        artifactName: Artifacts
 - job: linuxBuild
   displayName: 'Build - Ubuntu 20.04 - With Memory Pool'
   continueOnError: false
@@ -38,6 +43,11 @@ jobs:
         SourceFolder: "build/src/"
         Contents: "liboatpp.a"
         TargetFolder: $(Build.ArtifactStagingDirectory)/lib/linux/
+    - task: PublishBuildArtifacts@1
+      displayName: "Publish Artifacts"
+      inputs:
+        pathToPublish: $(Build.ArtifactStagingDirectory)
+        artifactName: Artifacts
 - job: windowsBuild
   displayName: 'Build - Windows - With Memory Pool'
   continueOnError: false
@@ -55,20 +65,9 @@ jobs:
     - task: CopyFiles@2
       displayName: "Copy Library"
       inputs:
-        SourceFolder: "./"
-        Contents: "**/*..lib"
+        SourceFolder: "build/src/Debug/"
+        Contents: "oatpp.lib"
         TargetFolder: $(Build.ArtifactStagingDirectory)/lib/windows/
-- job: publish
-  displayName: 'Publish headers'
-  continueOnError: false
-  dependsOn:
-    - copyHeaders
-    - linuxBuild
-    - windowsBuild
-  pool:
-    vmImage: 'ubuntu-latest'
-  steps:
-    - checkout: none
     - task: PublishBuildArtifacts@1
       displayName: "Publish Artifacts"
       inputs:
